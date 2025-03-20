@@ -47,7 +47,7 @@ fp.Map() {
 # fp.Stream echoes arguments escaped and separated by newline.
 fp.Stream() {
   local arg
-  for arg in $*; do
+  for arg in "$@"; do
     printf '%q\n' "$arg"
   done
 }
