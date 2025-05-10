@@ -25,19 +25,23 @@ fp.Collect() {
 }
 
 # fp.Each applies its arguments as a command to each argument from stdin.
+# It does not propagate any error from evaluating command.
 fp.Each() {
   local command=$1 arg
   while IFS='' read -r arg; do
     eval "$command $arg"
   done
+  return 0
 }
 
 # fp.KeepIf filters lines from stdin using command.
+# It does not propagate any error from evaluating command.
 fp.KeepIf() {
   local command=$1 arg
   while IFS='' read -r arg; do
     eval "$command $arg" && echo "$arg"
   done
+  return 0
 }
 
 # fp.Map returns $EXPRESSION evaluated with the value of stdin as $VARNAME.
@@ -61,22 +65,16 @@ fp.RemoveIf() {
   done
 }
 
-# fp.Stream echoes arguments escaped and separated by the first character of IFS.
+# fp.Stream converts its arguments to a newline-separated output stream.
 fp.Stream() {
-  local arg
-  for arg in "$@"; do
-    printf "%q${IFS:0:1}" "$arg"
-  done
+  local IFS=$'\n'
+  (( $# == 0 )) || echo "$*"
 }
 
-# fp.StreamList echoes list, splitting on sep.
+# fp.StreamList streams the elements of list, splitting on sep.
 fp.StreamList() {
-  local list=$1 sep=${2:-${IFS:0:1}}
-
-  local IFS=$sep
-  for field in $list; do
-    printf '%q\n' $field
-  done
+  local list=$1 IFS=${2:-$IFS}
+  fp.Stream $list
 }
 
 # logging
