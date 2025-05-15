@@ -48,8 +48,7 @@ fp.KeepIf() {
 # $EXPRESSION must respect double-quoting rules and so can't contain naked quotes.
 # $VARNAME may not be "VARNAME" or "EXPRESSION".
 fp.Map() {
-  local VARNAME EXPRESSION  # borrow a different namespace since we're passing a variable name
-  case $VARNAME in VARNAME|EXPRESSION ) fp.fatal "fp.Map: VARNAME may not be 'VARNAME' or 'EXPRESSION'";; esac
+  local VARNAME=$1 EXPRESSION=$2  # borrow a different namespace since we're passing a variable name
 
   local "$VARNAME"
   while IFS='' read -r "$VARNAME"; do
