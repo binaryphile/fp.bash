@@ -49,9 +49,15 @@ fp.KeepIf() {
 # $VARNAME may not be "VARNAME" or "EXPRESSION".
 fp.Map() {
   local VARNAME=$1 EXPRESSION=$2  # borrow a different namespace since we're passing a variable name
+  case $VARNAME in VARNAME|EXPRESSION ) fp.fatal "fp.Map: VARNAME may not be 'VARNAME' or 'EXPRESSION'";; esac
 
   local "$VARNAME"
-  while IFS='' read -r "$VARNAME"; do
+  # IFS=' ' (not '') strips leading/trailing spaces from each line, so callers
+  # can feed an indented heredoc without embedding leading whitespace in the
+  # value -- see dotfiles update-env commit d2f0cd5 (2026-05-13), which found
+  # a real bug from IFS='' here: a value like "  era-serve" (embedded space)
+  # fragments into two words the next time it round-trips through eval.
+  while IFS=' ' read -r "$VARNAME"; do
     eval "echo \"$EXPRESSION\""
   done
 }
