@@ -74,8 +74,12 @@ fp.Map() {
 }
 
 # fp.RemoveIf filters lines from stdin using the negation of command.
+# Multiple arguments join into one command, same %q-escaped joining as
+# fp.Each/fp.KeepIf.
 fp.RemoveIf() {
-  local command=$1 arg
+  local command
+  printf -v command '%q ' "$@"
+  local arg
   while IFS='' read -r arg; do
     eval "! $command $arg" && echo "$arg"
   done
