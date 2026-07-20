@@ -25,19 +25,30 @@ fp.Collect() {
 }
 
 # fp.Each applies its arguments as a command to each argument from stdin.
+# Multiple arguments join into one command, e.g. `fp.Each try task.Ln
+# nix-wrapper <<<...` runs `try task.Ln nix-wrapper $line` per stdin line --
+# NOT `try` with the other two words silently dropped. %q-escaped so a
+# command word containing whitespace or shell metacharacters round-trips
+# through eval as one token rather than fragmenting (mk.bash's mk.Cue uses
+# the same printf -v '%q ' idiom, there for display rather than re-eval).
 # It does not propagate any error from evaluating command.
 fp.Each() {
-  local command=$1 arg
+  local command
+  printf -v command '%q ' "$@"
+  local arg
   while IFS='' read -r arg; do
     eval "$command $arg"
   done
   return 0
 }
 
-# fp.KeepIf filters lines from stdin using command.
+# fp.KeepIf filters lines from stdin using command. Multiple arguments join
+# into one command, same %q-escaped joining as fp.Each.
 # It does not propagate any error from evaluating command.
 fp.KeepIf() {
-  local command=$1 arg
+  local command
+  printf -v command '%q ' "$@"
+  local arg
   while IFS='' read -r arg; do
     eval "$command $arg" && echo "$arg"
   done
