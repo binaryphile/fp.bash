@@ -140,13 +140,24 @@ produce genuinely zero output lines.
 
 ## Known gaps
 
-- **No test suite.** `fp.bash` currently has no `*_test.bash` file. The
-  multi-word-command bug above went undetected specifically because
-  nothing exercised `fp.Each`/`fp.KeepIf` with more than one command word —
-  a `tesht` suite covering that case (and the `fp.Map` `IFS=' '` case,
-  which has an independent historical incident of its own) would have
-  caught both by construction. Not added as part of this doc-writing pass;
-  worth a follow-up task.
-- **`fp.RemoveIf`** still has the pre-fix single-argument signature (see
-  above) — consistent with its current callers, but latent for the same
-  reason `fp.Each` was.
+- **`printf %q` covers the command prefix only, not the streamed line.**
+  `fp.Each`/`fp.KeepIf`/`fp.RemoveIf` all `%q`-escape their own positional
+  arguments before the eval loop, but the per-line value read from stdin is
+  still spliced into `eval "$command $arg"` unescaped. A line containing
+  whitespace, glob characters, `;`, or a command substitution can still
+  split into multiple words or execute as a separate command — this is
+  pre-existing behavior (present before and after the multi-word-command
+  fix above), not something the `%q` fix addresses. Callers piping
+  untrusted or externally-sourced line content should sanitize before
+  these functions, or avoid them. `fp.bash_test.bash`'s
+  `test_fp.Each_argWithMetacharacters` characterizes this scope explicitly
+  as a passing (documented, not accidental) behavior.
+- **No cross-copy drift check.** `fp.bash` is deliberately vendored
+  (`~/dotfiles/bash/lib/fp.bash`) rather than sourced from a single
+  location — see "Use fp.bash... vendored" in the bash style guide for
+  why. This is the *second* incident (after the `fp.Map` `IFS`
+  bug) where a fix landed in one copy and had to be separately, manually
+  ported to the other. No automated check currently verifies the two
+  copies match; a cheap one (byte diff, or a content-hash assertion run
+  from either repo) would catch drift going forward instead of relying on
+  someone noticing by hand.
