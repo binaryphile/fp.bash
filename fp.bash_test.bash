@@ -109,30 +109,36 @@ test_fp.Each_argWithMetacharacters() {
 # (equivalent to chaining the predicates through separate fp.KeepIf stages).
 test_fp.All_keepsWhenAllHold() {
   ## arrange
+
+  # isLong reports whether $1 is longer than 3 characters.
   isLong() { (( ${#1} > 3 )); }
-  hasA()   { [[ $1 == *a* ]]; }
+  # hasA reports whether $1 contains an 'a'.
+  hasA() { [[ $1 == *a* ]]; }
 
   ## act -- keep items that are BOTH longer than 3 AND contain 'a'
-  local got
-  got=$(printf '%s\n' cat banana xy apple | fp.KeepIf fp.All isLong hasA)
+  local got_
+  got_=$(printf '%s\n' cat banana xy apple | fp.KeepIf fp.All isLong hasA)
 
   ## assert -- banana/apple qualify; cat (too short), xy (neither) drop
-  tesht.AssertGot "$got" $'banana\napple'
+  tesht.AssertGot "$got_" $'banana\napple'
 }
 
 # test_fp.All_dropsWhenOneFails verifies a single failing predicate rejects the
 # item even when the others hold.
 test_fp.All_dropsWhenOneFails() {
   ## arrange
+
+  # isLong reports whether $1 is longer than 3 characters.
   isLong() { (( ${#1} > 3 )); }
-  never()  { return 1; }
+  # never reports false for any input.
+  never() { return 1; }
 
   ## act
-  local got
-  got=$(printf '%s\n' banana apple | fp.KeepIf fp.All isLong never)
+  local got_
+  got_=$(printf '%s\n' banana apple | fp.KeepIf fp.All isLong never)
 
   ## assert -- never() rejects every item
-  tesht.AssertGot "$got" ''
+  tesht.AssertGot "$got_" ''
 }
 
 # test_fp.All_shortCircuits verifies fp.All stops at the first false predicate --
@@ -141,11 +147,13 @@ test_fp.All_shortCircuits() {
   ## arrange
   local out_=$(mktemp -u)
   trap 'rm -f "$out_"' RETURN
-  false_() { return 1; }
+  # falsePred reports false for any input.
+  falsePred() { return 1; }
+  # marker records that it ran, then reports true.
   marker() { echo reached >>"$out_"; return 0; }
 
-  ## act -- false_ precedes marker; marker must never run
-  fp.All false_ marker somevalue || true
+  ## act -- falsePred precedes marker; marker must never run
+  fp.All falsePred marker somevalue || true
 
   ## assert -- out_ empty: marker was short-circuited
   local got_
@@ -159,9 +167,9 @@ test_fp.All_shortCircuits() {
 test_fp.All_zeroArgsIsControlledFailure() {
   ## arrange -- run under set -u, as a real consumer might
   ## act
-  local rc
+  local -i rc=0
   ( set -u; fp.All ) && rc=$? || rc=$?
 
   ## assert
-  tesht.AssertRC "$rc" 2
+  tesht.AssertRC $rc 2
 }

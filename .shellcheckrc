@@ -1,0 +1,6 @@
+# fp.bash is a LIBRARY: it leaves IFS/noglob to its callers by design (bash
+# style guide "library carve-out"), so it quotes expansions defensively and
+# must NOT set `IFS=$'\n'; set -o noglob` itself. SC9010 (which flags quoted
+# expansions in a file lacking that discipline) is therefore a false positive
+# for this file; disable it library-wide per the guide's recommended mechanism.
+disable=SC9010
