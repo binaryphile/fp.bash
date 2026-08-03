@@ -13,6 +13,18 @@
 # Private function names begin with lowercase letters.
 # Public function names begin with uppercase letters.
 
+# fp.All reports whether every predicate in the leading arguments holds for the
+# trailing value -- the item fp.KeepIf appends last. Collapses a filter chain
+# into one stage: `fp.KeepIf fp.All isFile isExecutable isCascadiaBinExported`. (C)
+fp.All() {
+  local -a args=( "$@" )
+  local value=${args[-1]} pred
+  for pred in "${args[@]:0:${#args[@]}-1}"; do
+    $pred "$value" || return 1
+  done
+  return 0
+}
+
 # fp.Collect collects a stream into a string.
 fp.Collect() {
   local sep=${1:-${IFS:0:1}}

@@ -103,3 +103,52 @@ test_fp.Each_argWithMetacharacters() {
   got_=$(cat "$out_")
   tesht.AssertGot "$got_" $'called with: a\ncalled with: b'
 }
+
+# test_fp.All_keepsWhenAllHold verifies fp.All, used as fp.KeepIf's predicate,
+# keeps only items for which every predicate holds -- the conjunction contract
+# (equivalent to chaining the predicates through separate fp.KeepIf stages).
+test_fp.All_keepsWhenAllHold() {
+  ## arrange
+  isLong() { (( ${#1} > 3 )); }
+  hasA()   { [[ $1 == *a* ]]; }
+
+  ## act -- keep items that are BOTH longer than 3 AND contain 'a'
+  local got
+  got=$(printf '%s\n' cat banana xy apple | fp.KeepIf fp.All isLong hasA)
+
+  ## assert -- banana/apple qualify; cat (too short), xy (neither) drop
+  tesht.AssertGot "$got" $'banana\napple'
+}
+
+# test_fp.All_dropsWhenOneFails verifies a single failing predicate rejects the
+# item even when the others hold.
+test_fp.All_dropsWhenOneFails() {
+  ## arrange
+  isLong() { (( ${#1} > 3 )); }
+  never()  { return 1; }
+
+  ## act
+  local got
+  got=$(printf '%s\n' banana apple | fp.KeepIf fp.All isLong never)
+
+  ## assert -- never() rejects every item
+  tesht.AssertGot "$got" ''
+}
+
+# test_fp.All_shortCircuits verifies fp.All stops at the first false predicate --
+# a later predicate is not evaluated once one has failed.
+test_fp.All_shortCircuits() {
+  ## arrange
+  local out_=$(mktemp -u)
+  trap 'rm -f "$out_"' RETURN
+  false_() { return 1; }
+  marker() { echo reached >>"$out_"; return 0; }
+
+  ## act -- false_ precedes marker; marker must never run
+  fp.All false_ marker somevalue || true
+
+  ## assert -- out_ empty: marker was short-circuited
+  local got_
+  got_=$(cat "$out_" 2>/dev/null)
+  tesht.AssertGot "$got_" ''
+}
