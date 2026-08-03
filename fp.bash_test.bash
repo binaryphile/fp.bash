@@ -152,3 +152,16 @@ test_fp.All_shortCircuits() {
   got_=$(cat "$out_" 2>/dev/null)
   tesht.AssertGot "$got_" ''
 }
+
+# test_fp.All_zeroArgsIsControlledFailure verifies fp.All with no arguments
+# returns rc 2 (a controlled usage failure) rather than aborting on an empty-array
+# subscript under set -u (grade #39095 IMPL finding 2).
+test_fp.All_zeroArgsIsControlledFailure() {
+  ## arrange -- run under set -u, as a real consumer might
+  ## act
+  local rc
+  ( set -u; fp.All ) && rc=$? || rc=$?
+
+  ## assert
+  tesht.AssertRC "$rc" 2
+}

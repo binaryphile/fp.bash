@@ -17,10 +17,11 @@
 # trailing value -- the item fp.KeepIf appends last. Collapses a filter chain
 # into one stage: `fp.KeepIf fp.All isFile isExecutable isCascadiaBinExported`. (C)
 fp.All() {
+  (( $# >= 1 )) || return 2                    # no value to test -> controlled failure, not a set -u abort
   local -a args=( "$@" )
   local value=${args[-1]} pred
   for pred in "${args[@]:0:${#args[@]}-1}"; do
-    $pred "$value" || return 1
+    "$pred" "$value" || return 1
   done
   return 0
 }
