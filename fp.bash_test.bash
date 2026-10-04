@@ -192,6 +192,7 @@ test_fp.Fatal() {
   local -A case7=([name]='negative becomes 1'      [prior]=0 [rc_]=-1    [wantRC]=1)
   local -A case8=([name]='non-numeric becomes 1'   [prior]=0 [rc_]=abc   [wantRC]=1)
   local -A case9=([name]='leading zero is decimal' [prior]=0 [rc_]=08    [wantRC]=8)
+  local -A case10=([name]='512 becomes 1'         [prior]=0 [rc_]=512   [wantRC]=1)
 
   subtest() {
     local casename=$1
