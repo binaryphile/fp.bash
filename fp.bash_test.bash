@@ -19,11 +19,11 @@ test_fp.Each_singleWordCommand() {
   local input=$'one\ntwo'
 
   ## act
-  local got
-  got=$(echo "$input" | fp.Each recordArgs)
+  local gotLines
+  gotLines=$(echo "$input" | fp.Each recordArgs)
 
   ## assert
-  tesht.AssertGot "$got" $'ARG:one\nARG:two'
+  tesht.AssertGot "$gotLines" $'ARG:one\nARG:two'
 }
 
 # test_fp.Each_multiWordCommand is the actual regression test for the bug
@@ -37,11 +37,11 @@ test_fp.Each_multiWordCommand() {
   local input='lineval'
 
   ## act
-  local got
-  got=$(echo "$input" | fp.Each recordArgs fixed extra)
+  local gotLines
+  gotLines=$(echo "$input" | fp.Each recordArgs fixed extra)
 
   ## assert
-  tesht.AssertGot "$got" $'ARG:fixed\nARG:extra\nARG:lineval'
+  tesht.AssertGot "$gotLines" $'ARG:fixed\nARG:extra\nARG:lineval'
 }
 
 # test_fp.KeepIf_multiWordCommand mirrors the fp.Each multi-word case for
@@ -54,11 +54,11 @@ test_fp.KeepIf_multiWordCommand() {
   }
 
   ## act
-  local got
-  got=$(printf '%s\n' short muchlonger | fp.KeepIf isLongerThan 7)
+  local got_
+  got_=$(printf '%s\n' short muchlonger | fp.KeepIf isLongerThan 7)
 
   ## assert
-  tesht.AssertGot "$got" 'muchlonger'
+  tesht.AssertGot "$got_" 'muchlonger'
 }
 
 # test_fp.RemoveIf_multiWordCommand closes the specific gap the grader
@@ -74,11 +74,11 @@ test_fp.RemoveIf_multiWordCommand() {
   }
 
   ## act
-  local got
-  got=$(printf '%s\n' short muchlonger | fp.RemoveIf isLongerThan 7)
+  local got_
+  got_=$(printf '%s\n' short muchlonger | fp.RemoveIf isLongerThan 7)
 
   ## assert
-  tesht.AssertGot "$got" 'short'
+  tesht.AssertGot "$got_" 'short'
 }
 
 # test_fp.Each_argWithMetacharacters characterizes the scope of the %q fix
