@@ -30,7 +30,7 @@ fp.All() {
 fp.Collect() {
   local sep=${1:-${IFS:0:1}}
 
-  local IFS=$sep field results=()
+  local IFS=$sep field='' results=()
   while IFS='' read -r field; do
     eval "results+=( $field )"
   done
@@ -48,7 +48,7 @@ fp.Collect() {
 fp.Each() {
   local command
   printf -v command '%q ' "$@"
-  local arg
+  local arg=''
   while IFS='' read -r arg; do
     eval "$command $arg"
   done
@@ -61,7 +61,7 @@ fp.Each() {
 fp.KeepIf() {
   local command
   printf -v command '%q ' "$@"
-  local arg
+  local arg=''
   while IFS='' read -r arg; do
     eval "$command $arg" && echo "$arg"
   done
@@ -92,7 +92,7 @@ fp.Map() {
 fp.RemoveIf() {
   local command
   printf -v command '%q ' "$@"
-  local arg
+  local arg=''
   while IFS='' read -r arg; do
     eval "! $command $arg" && echo "$arg"
   done
