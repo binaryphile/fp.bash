@@ -16,11 +16,11 @@ recordArgs() {
 # confirm the fix is a strict superset, no regression).
 test_fp.Each_singleWordCommand() {
   ## arrange
-  local input=$'one\ntwo'
+  local inputLines=$'one\ntwo'
 
   ## act
   local gotLines
-  gotLines=$(echo "$input" | fp.Each recordArgs)
+  gotLines=$(echo "$inputLines" | fp.Each recordArgs)
 
   ## assert
   tesht.AssertGot "$gotLines" $'ARG:one\nARG:two'
@@ -38,7 +38,7 @@ test_fp.Each_multiWordCommand() {
 
   ## act
   local gotLines
-  gotLines=$(echo "$input" | fp.Each recordArgs fixed extra)
+  gotLines=$(echo $input | fp.Each recordArgs fixed extra)
 
   ## assert
   tesht.AssertGot "$gotLines" $'ARG:fixed\nARG:extra\nARG:lineval'
@@ -48,6 +48,8 @@ test_fp.Each_multiWordCommand() {
 # fp.KeepIf, which shares the identical historical bug pattern.
 test_fp.KeepIf_multiWordCommand() {
   ## arrange
+
+  # isLongerThan reports whether `s` is longer than `n` characters. (C)
   isLongerThan() {
     local n=$1 s=$2
     (( ${#s} > n ))
@@ -68,6 +70,8 @@ test_fp.KeepIf_multiWordCommand() {
 # would hit the exact silent-argument-drop bug this cycle otherwise fixed.
 test_fp.RemoveIf_multiWordCommand() {
   ## arrange
+
+  # isLongerThan reports whether `s` is longer than `n` characters. (C)
   isLongerThan() {
     local n=$1 s=$2
     (( ${#s} > n ))
