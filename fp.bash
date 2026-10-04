@@ -73,7 +73,7 @@ fp.KeepIf() {
 # $VARNAME may not be "VARNAME" or "EXPRESSION".
 fp.Map() {
   local VARNAME=$1 EXPRESSION=$2  # borrow a different namespace since we're passing a variable name
-  case $VARNAME in VARNAME|EXPRESSION ) fp.fatal "fp.Map: VARNAME may not be 'VARNAME' or 'EXPRESSION'";; esac
+  case $VARNAME in VARNAME|EXPRESSION ) fp.Fatal "fp.Map: VARNAME may not be 'VARNAME' or 'EXPRESSION'";; esac
 
   local "$VARNAME"
   # IFS=' ' (not '') strips leading/trailing spaces from each line, so callers
@@ -112,8 +112,14 @@ fp.StreamList() {
 
 # logging
 
-fp.fatal() {
+# fp.Fatal writes "fatal: `msg`" to stderr and exits with `rc` (default $?).
+#
+# An `rc` that is not a non-negative decimal integer, or is 0 mod 256, exits 1
+# instead, so a call after a successful command still stops the script with a
+# failure. 10# reads a leading-zero rc as decimal, the way exit does.
+fp.Fatal() {
   local msg=$1 rc=${2:-$?}
-  echo "fatal: $msg"
+  echo "fatal: $msg" >&2
+  [[ $rc =~ ^[0-9]+$ ]] && (( 10#$rc % 256 )) || rc=1
   exit "$rc"
 }
