@@ -162,11 +162,22 @@ pipelines, which is why UC-1 below is written at **Summary** level.
 
 - **Primary Actor:** Script Author
 - **Goal:** Stop script execution immediately with a one-line `fatal:
-  <message>` and a specific exit code.
+  <message>` on stderr and a nonzero exit code.
 - **Main Success Scenario:**
-  1. Script Author calls `fp.fatal "message" [rc]` from anywhere in the
-     script.
-  2. `fp.fatal` prints `fatal: <message>` and exits with `rc` (default:
-     `$?` at the time of the call).
+  1. Script Author calls `fp.Fatal "message" [rc]` from anywhere in the
+     script, typically as `cmd || fp.Fatal "..."`.
+  2. `fp.Fatal` writes `fatal: <message>` to stderr.
+  3. `fp.Fatal` exits the script with `rc` (default: `$?` at the time of
+     the call).
+- **Extensions:**
+  - 3a. `rc` is not a non-negative decimal integer, or is 0 modulo 256
+    (read as decimal, so `0256` counts):
+    1. `fp.Fatal` exits with 1 instead; the script still stops with a
+       failure, never with 0.
+- **Minimal Guarantee:** The script stops with a nonzero exit code and
+  nothing is written to stdout.
 - **Preconditions:** Used internally by `fp.Map` to guard the `VARNAME`/
   `EXPRESSION` collision case; also safe to call directly from caller code.
+- **Notes:** Breaking changes in 0.3: the function is `fp.Fatal` (it was
+  `fp.fatal`), and the message goes to stderr, so a caller that captured it
+  from stdout no longer sees it there.
