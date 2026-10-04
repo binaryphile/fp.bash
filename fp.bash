@@ -1,5 +1,10 @@
 # fp.bash -- functional programming in bash
 
+# A library leaves IFS and noglob to its caller and quotes expansions
+# defensively, so SC9010 (quoted expansions without that discipline) does not
+# apply. The directive travels with the file into every vendored copy.
+# shellcheck disable=SC9010
+
 # Naming Policy:
 #
 # All function and variable names are camelCased, but they may begin with uppercase letters.
